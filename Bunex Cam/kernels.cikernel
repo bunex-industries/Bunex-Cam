@@ -1,0 +1,25 @@
+kernel vec4 coreImageKernel(sampler image, float val)
+{
+	vec4 src = sample(image, samplerCoord(image));
+	src = unpremultiply(src);
+	float aa = src.a;
+	src.a = aa*val;
+	src = premultiply(src);
+	return src.rgba;
+}
+
+
+
+kernel vec4 inputProcessor(sampler src, float red, float green, float blue, float speed, float noiseGateMin, float noiseGateMax)
+{
+    vec4 img = sample(src, samplerCoord(src));
+    
+    float lum = (img.r + img.g + img.b) / 3.0;
+    
+    img.r = img.r * speed * red * (lum > noiseGateMin ? lum > noiseGateMax ? 1.0 : (lum-noiseGateMin)/(noiseGateMax - noiseGateMin) : 0.0);
+    img.g = img.g * speed * green * (lum > noiseGateMin ? lum > noiseGateMax ? 1.0 : (lum-noiseGateMin)/(noiseGateMax - noiseGateMin) : 0.0);
+    img.b = img.b * speed * blue * (lum > noiseGateMin ? lum > noiseGateMax ? 1.0 : (lum-noiseGateMin)/(noiseGateMax - noiseGateMin) : 0.0);
+    
+    return img.rgba;
+}
+
